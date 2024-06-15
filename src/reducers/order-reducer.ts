@@ -1,17 +1,24 @@
-import { OrderItem } from "../types";
+import { MenuItem, OrderItem } from "../types";
 
 export type OrderActions = 
-{ type: 'save-order', payload: {newOrder: OrderItem } } |
-{ type: 'delete-order', payload: {id: OrderItem['id'] } }
+{ type: 'save-order', payload: {newOrder: MenuItem } } |
+{ type: 'delete-order', payload: {id: OrderItem['id'] } } |
+{ type: 'save-tip', payload: { tip: number } } |
+{ type: 'place-order' } |
+{ type: 'total-order' }
 
 export type OrderState = {
     orders : OrderItem[]
     orderId: OrderItem['id']
+    tip: number
+    totalOrder: number
 }
 
 export const initialState: OrderState = {
     orders: [],
-    orderId: 0
+    orderId: 0,
+    tip: 0,
+    totalOrder: 0
 }
 
 
@@ -21,7 +28,7 @@ export const orderReducer = (
 ) => {
 
     if(action.type === 'save-order'){
-        const findOrder = state.orders.find((order)=> order.id === state.orderId)
+        const findOrder = state.orders.find((order)=> order.id === action.payload.newOrder.id)
         if(findOrder === undefined) {
             const newOrder = {
                 ...action.payload.newOrder,
@@ -35,8 +42,8 @@ export const orderReducer = (
             const newOrders = state.orders.map((order)=>{
                 if(order.id === findOrder.id) {
                     return {
-                        ...action.payload.newOrder,
-                        quantity: action.payload.newOrder.quantity + 1
+                        ...order,
+                        quantity: order.quantity + 1
                     }
                 }
                 return order
@@ -49,25 +56,38 @@ export const orderReducer = (
         }
     }
 
-    // if (action.type === 'setActiveId') {
-    //     return {
-    //         ...state,
-    //         activeId: action.payload.id
-    //     }
-    // }
 
-    // if (action.type === 'delete-activity') {
-    //     return {
-    //         ...state,
-    //         activities: state.activities.filter( activity => activity.id !== action.payload.id)
-    //     }
-    // }
+    if (action.type === 'delete-order') {
+        return {
+            ...state,
+            orders: state.orders.filter( order => order.id !== action.payload.id)
+        }
+    }
 
-    // if(action.type === 'restart-app') {
-    //     return {
-    //         activities: [],
-    //         activeId: ''
-    //     }
-    // }
+    if (action.type === 'save-tip') {
+        return {
+            ...state,
+            tip: action.payload.tip
+        }
+    }
+
+    if(action.type === 'place-order') {
+        return {
+            ...initialState
+        }
+    }
+
+    if(action.type === 'total-order') {
+        const total = state.orders.reduce((total: number, item)=>{
+            return total + item.price*item.quantity
+        },0)
+
+        return {
+            ...state,
+            totalOrder: total
+        }
+    }
+
+
     return state
 }

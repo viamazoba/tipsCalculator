@@ -1,20 +1,15 @@
+import { useReducer } from "react"
 import { MenuItem } from "./components/MenuItem"
 import OrderContents from "./components/OrderContents"
 import OrderTotals from "./components/OrderTotals"
 import TipPercentageForm from "./components/TipPercentageForm"
 import { menuItems } from "./data/db"
-import useOrder from "./hooks/useOrder"
+import { initialState, orderReducer } from "./reducers/order-reducer"
 
 function App() {
-    const {
-        addItem,
-        order,
-        deleteItem,
-        totalOrder,
-        tip,
-        setTip,
-        placeOrder
-    } = useOrder()
+
+    const [ order, dispatch ] = useReducer(orderReducer,initialState)
+
   return (
     <>
       <header className="bg-teal-400 py-5">
@@ -29,28 +24,26 @@ function App() {
                         <MenuItem
                             key={item.id}
                             item={item}
-                            addItem={addItem}
+                            dispatch= {dispatch}
                         />
                     ))}
                 </div>
             </div>
             <div className="border border-dashed border-slate-300 p-5 rounded-lg space-y-10">
                 {
-                    order.length > 0 ?
+                    order.orders.length > 0 ?
                     <>
                         <OrderContents
-                            order= {order}
-                            deleteItem= {deleteItem}
+                            order= {order.orders}
+                            dispatch= {dispatch}
                         />
                         <TipPercentageForm
-                            setTip= {setTip}
-                            tip={tip}
+                            dispatch={dispatch}
+                            tip={order.tip}
                         />
                         <OrderTotals
                             order={order}
-                            totalOrder = {totalOrder}
-                            tip={tip}
-                            placeOrder={placeOrder}
+                            dispatch={dispatch}
                         />
                     </>
                     :
